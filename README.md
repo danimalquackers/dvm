@@ -97,6 +97,8 @@ vmLib.mkPackerPlugin {
 }
 ```
 
+Although this project was designed with the QEMU provider in mind, any offline provider can be used. Cloud providers are not supported because the build environment does not have Internet access.
+
 ### `mkPacker`
 
 Bundle Packer with plugins:
