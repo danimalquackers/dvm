@@ -23,7 +23,7 @@ stdenv.mkDerivation {
   src = pkgs.fetchzip {
     inherit hash;
 
-    url = "https://releases.hashicorp.com/packer-plugin-${name}/v${version}/packer-plugin-${name}_v${version}_${os}_${arch}.zip";
+    url = "https://releases.hashicorp.com/packer-plugin-${name}/${version}/packer-plugin-${name}_${version}_${os}_${arch}.zip";
     stripRoot = false;
   };
 

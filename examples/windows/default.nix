@@ -1,0 +1,187 @@
+{
+  pkgs,
+  vmLib,
+  qemuPlugin,
+}:
+
+let
+  config = fun: {
+    variables = {
+      # System configuration
+      computerName = "DVM-Windows";
+      sku = "Windows 11 Pro";
+      disk_size = "61440";
+      memory = 4096;
+
+      # User configuration
+      displayName = "Vagrant";
+      username = "vagrant";
+      password = "vagrant";
+
+      # Build options
+      restart_timeout = "5m";
+      vm_name = "windows.qcow2";
+
+      # Connection settings
+      winrm_timeout = "6h";
+    };
+
+    locals = {
+      # Build dependencies
+      iso_url = pkgs.requireFile {
+        name = "windows-11.iso";
+        url = "https://www.microsoft.com/en-us/software-download/windows11";
+        hash = "sha256-domEcGuQlHlBeyNoQ4kJRA8pZ/8FxqkZXtJmclTkZeM=";
+      };
+      iso_checksum = "sha256:768984706b909479417b2368438909440f2967ff05c6a9195ed2667254e465e3";
+
+      virtio_win_iso = pkgs.fetchurl {
+        url = "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.285-1/virtio-win-0.1.285.iso";
+        hash = "sha256-4UzyuUSSw+kl8AcLp/3+3rIEjJHuqcWlr7MCMqOXYzE=";
+      };
+
+      debloat_script =
+        let
+          debloat-src = pkgs.fetchFromGitHub {
+            owner = "Raphire";
+            repo = "Win11Debloat";
+            rev = "2026.07.11";
+            hash = "sha256-RuOySa9KYZj2eZiLU84/2l0/DPAjSyaz9HudWIYBc0Q=";
+          };
+          debloat =
+            pkgs.runCommand "win11debloat-zip"
+              {
+                buildInputs = with pkgs; [ zip ];
+              }
+              ''
+                mkdir -p $out
+
+                cd ${debloat-src}
+
+                # Zip the Win11Debloat tool
+                zip -r $out/Win11Debloat.zip .
+              '';
+        in
+        debloat;
+
+      # Generate Autounattend answer file
+      autounattend = fun.templatefile ./Autounattend.xml.pkrtpl.hcl {
+        computerName = "\${var.computerName}";
+        displayName = "\${var.displayName}";
+        username = "\${var.username}";
+        password = "\${var.password}";
+        sku = "\${var.sku}";
+      };
+    };
+
+    packer.required_plugins.qemu = {
+      version = ">= 1.1.0";
+      source = "github.com/hashicorp/qemu";
+    };
+
+    source.qemu.windows = {
+      boot_command = [
+        "<enter>"
+      ];
+      boot_wait = "2s";
+
+      # Hardware configuration
+      cpus = "2";
+      cpu_model = "host";
+      memory = "\${var.memory}";
+      disk_size = "\${var.disk_size}";
+      disk_interface = "virtio";
+      machine_type = "q35";
+      accelerator = "kvm";
+
+      # Windows image
+      iso_checksum = "\${local.iso_checksum}";
+      iso_url = "\${local.iso_url}";
+
+      # Boot configuration
+      efi_boot = true;
+
+      vm_name = "\${var.vm_name}";
+
+      # Dynamically generated answer file and scripts
+      cd_content = {
+        "Autounattend.xml" = "\${local.autounattend}";
+        "enable-winrm.ps1" = fun.file ./enable-winrm.ps1;
+      };
+      cd_files = [
+        "\${local.debloat_script}/Win11Debloat.zip"
+      ];
+
+      # Packer connection settings
+      communicator = "winrm";
+      winrm_password = "vagrant";
+      winrm_timeout = "\${var.winrm_timeout}";
+      winrm_username = "vagrant";
+
+      qemuargs = [
+        # Virtio drivers disk
+        [
+          "--drive"
+          "file=\${local.virtio_win_iso},media=cdrom,index=2"
+        ]
+
+        # Disable Internet access for impure builds
+        [
+          "-netdev"
+          "user,id=net0,restrict=y,hostfwd=tcp::{{ .SSHHostPort }}-:5985"
+        ]
+        [
+          "-device"
+          "virtio-net-pci,netdev=net0"
+        ]
+      ];
+    };
+
+    build = {
+      sources = [ "source.qemu.windows" ];
+      provisioner = [
+        {
+          # Install QEMU guest tools
+          powershell = {
+            inline = [
+              "msiexec /i F:\\guest-agent\\qemu-ga-x86_64.msi /qn /norestart"
+            ];
+          };
+        }
+
+        {
+          # Debloat the image as much as possible
+          powershell = {
+            inline = [
+              "Expand-Archive -Path E:\\Win11Debloat.zip -DestinationPath C:\\Windows\\Temp\\Win11Debloat"
+              "C:\\Windows\\Temp\\Win11Debloat\\Win11Debloat.ps1 -Silent -RemoveApps -DisableTelemetry"
+              "Remove-Item -Path C:\\Windows\\Temp\\Win11Debloat -Recurse"
+            ];
+          };
+        }
+
+        {
+          # Restart to allow changes to take effect
+          windows-restart = {
+            restart_timeout = "5m";
+          };
+        }
+      ];
+    };
+  };
+in
+{
+  windows = vmLib.mkVmImage {
+    inherit config;
+
+    name = "windows";
+    plugins = [ qemuPlugin ];
+  };
+
+  windows-debug = vmLib.mkVmBuilder {
+    inherit config;
+
+    name = "windows-debug";
+    plugins = [ qemuPlugin ];
+  };
+}

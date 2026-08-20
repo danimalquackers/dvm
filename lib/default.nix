@@ -16,4 +16,6 @@ rec {
     inherit mkPacker mkVmConfig;
   };
   mkVmRunner = pkgs.callPackage ./mkVmRunner.nix { };
+
+  fun = pkgs.callPackage ./fun.nix { };
 }

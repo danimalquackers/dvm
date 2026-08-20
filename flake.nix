@@ -52,9 +52,12 @@
           # Define standard plugins using the library helper
           qemuPlugin = vmLib.mkPackerPlugin {
             name = "qemu";
-            version = "1.1.0";
-            hash = "sha256-wL7CNcI2JGeF3ATBg9nC1nUcmJRTRnsQHEJdgtGrHFs="; # Replace with actual hash
-            binaries = with pkgs; [ qemu_kvm ];
+            version = "1.1.6";
+            hash = "sha256-m5TExlmdPxKnp45SjheMggnUNo1D3KMr+uV1zC2f3Ts=";
+            binaries = with pkgs; [
+              qemu_kvm
+              cdrtools
+            ];
           };
         in
         rec {
@@ -83,6 +86,8 @@
                 nixos-debug
                 ubuntu
                 ubuntu-debug
+                windows
+                windows-debug
                 ;
 
               # Expose Packer CLI
