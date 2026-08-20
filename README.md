@@ -195,3 +195,7 @@ pkgs.mkVmImage {
 └── examples/
     └── windows/           # Windows 11 UEFI configuration
 ```
+
+## AI Use Disclosure
+
+Portions of this project were developed with the assistance of AI coding tools, including [Antigravity](https://antigravity.dev) and OpenCode/OpenChamber. All AI-generated code has been reviewed by a human.
