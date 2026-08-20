@@ -1,0 +1,5 @@
+# build outputs
+result/
+
+# testing files
+*.iso
