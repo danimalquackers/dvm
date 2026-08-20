@@ -29,6 +29,15 @@
       # Expose the library as a callable function for downstream consumers
       flake.lib = import ./lib;
 
+      # Overlay adding the helper functions to pkgs.*
+      flake.overlays.default =
+        prev: next:
+        builtins.mapAttrs (name: value: value) self.lib {
+          pkgs = prev;
+          lib = prev.lib;
+          stdenv = prev.stdenv;
+        };
+
       perSystem =
         {
           config,
@@ -40,7 +49,12 @@
           # Instantiate Nixpkgs and allow Packer installation
           pkgs = import inputs.nixpkgs {
             inherit system;
-            config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "packer" ];
+            config.allowUnfreePredicate =
+              pkg:
+              builtins.elem (lib.getName pkg) [
+                "packer"
+                "windows"
+              ];
           };
 
           # Instantiate DVM libraries with current system's pkgs

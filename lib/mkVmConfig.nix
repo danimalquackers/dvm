@@ -6,10 +6,11 @@
 { name, config }:
 
 let
+  ref = pkgs.callPackage ./ref.nix { };
   fun = pkgs.callPackage ./fun.nix { };
 
   # Call the config expression with the fun helper
-  generatedConfig = config fun;
+  generatedConfig = config ref fun;
 
   # Inject OVMF file variables
   patchedConfig = generatedConfig // {

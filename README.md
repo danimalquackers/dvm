@@ -112,7 +112,7 @@ Convert a Nix attribute set to a Packer JSON configuration file:
 ```nix
 vmLib.mkVmConfig {
   name = "my-vm";
-  config = fun: { /* ... */ };
+  config = ref: fun: { /* ... */ };
 }
 ```
 

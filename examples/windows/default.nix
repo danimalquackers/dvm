@@ -5,7 +5,7 @@
 }:
 
 let
-  config = fun: {
+  config = ref: fun: {
     variables = {
       # System configuration
       computerName = "DVM-Windows";
@@ -66,11 +66,11 @@ let
 
       # Generate Autounattend answer file
       autounattend = fun.templatefile ./Autounattend.xml.pkrtpl.hcl {
-        computerName = "\${var.computerName}";
-        displayName = "\${var.displayName}";
-        username = "\${var.username}";
-        password = "\${var.password}";
-        sku = "\${var.sku}";
+        computerName = ref.var "computerName";
+        displayName = ref.var "displayName";
+        username = ref.var "username";
+        password = ref.var "password";
+        sku = ref.var "sku";
       };
     };
 
@@ -88,41 +88,41 @@ let
       # Hardware configuration
       cpus = "2";
       cpu_model = "host";
-      memory = "\${var.memory}";
-      disk_size = "\${var.disk_size}";
+      memory = ref.var "memory";
+      disk_size = ref.var "disk_size";
       disk_interface = "virtio";
       machine_type = "q35";
       accelerator = "kvm";
 
       # Windows image
-      iso_checksum = "\${local.iso_checksum}";
-      iso_url = "\${local.iso_url}";
+      iso_checksum = ref.local "iso_checksum";
+      iso_url = ref.local "iso_url";
 
       # Boot configuration
       efi_boot = true;
 
-      vm_name = "\${var.vm_name}";
+      vm_name = ref.var "vm_name";
 
       # Dynamically generated answer file and scripts
       cd_content = {
-        "Autounattend.xml" = "\${local.autounattend}";
+        "Autounattend.xml" = ref.local "autounattend";
         "enable-winrm.ps1" = fun.file ./enable-winrm.ps1;
       };
       cd_files = [
-        "\${local.debloat_script}/Win11Debloat.zip"
+        "${ref.local "debloat_script"}/Win11Debloat.zip"
       ];
 
       # Packer connection settings
       communicator = "winrm";
-      winrm_password = "vagrant";
-      winrm_timeout = "\${var.winrm_timeout}";
-      winrm_username = "vagrant";
+      winrm_password = ref.var "password";
+      winrm_timeout = ref.var "winrm_timeout";
+      winrm_username = ref.var "username";
 
       qemuargs = [
         # Virtio drivers disk
         [
           "--drive"
-          "file=\${local.virtio_win_iso},media=cdrom,index=2"
+          "file=${ref.local "virtio_win_iso"},media=cdrom,index=2"
         ]
 
         # Disable Internet access for impure builds

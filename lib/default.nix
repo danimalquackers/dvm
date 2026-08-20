@@ -5,6 +5,7 @@
 }:
 
 rec {
+  # Core tools
   mkPacker = pkgs.callPackage ./mkPacker.nix { };
   mkPackerPlugin = pkgs.callPackage ./mkPackerPlugin.nix { };
 
@@ -17,5 +18,7 @@ rec {
   };
   mkVmRunner = pkgs.callPackage ./mkVmRunner.nix { };
 
+  # Packer syntax helpers
+  ref = pkgs.callPackage ./ref.nix { };
   fun = pkgs.callPackage ./fun.nix { };
 }
