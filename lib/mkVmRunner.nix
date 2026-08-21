@@ -89,7 +89,7 @@ pkgs.writeShellScriptBin "run-vm" ''
   BOOT_FLAGS=""
   if [ "$ENABLE_EFI" = true ]; then
     MACHINE_TYPE="q35"
-    BOOT_FLAGS="-bios ${pkgs.OVMF_fd}/FV/OVMF.fd"
+    BOOT_FLAGS="-bios ${pkgs.OVMF.fd}/FV/OVMF.fd"
   fi
 
   # Support SPICE and headless VMs

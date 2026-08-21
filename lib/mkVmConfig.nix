@@ -3,7 +3,10 @@
   lib,
 }:
 
-{ name, config }:
+{
+  name,
+  config,
+}:
 
 let
   ref = pkgs.callPackage ./ref.nix { };
