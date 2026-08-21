@@ -96,10 +96,6 @@
             {
               # Include example builders
               inherit (examples)
-                nixos
-                nixos-debug
-                ubuntu
-                ubuntu-debug
                 windows
                 windows-debug
                 ;

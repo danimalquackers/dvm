@@ -14,7 +14,7 @@ let
   baseImagePath = "${vmImage}/disk.qcow2";
   extraArgsStr = lib.escapeShellArgs extraArgs;
 in
-writeShellScriptBin "run-vm" ''
+pkgs.writeShellScriptBin "run-vm" ''
   # bash
 
   set -euo pipefail
