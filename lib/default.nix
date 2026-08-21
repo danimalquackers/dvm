@@ -19,6 +19,7 @@ rec {
     inherit mkPacker mkVmConfig;
   };
   mkVmRunner = pkgs.callPackage ./mkVmRunner.nix { };
+  mkAutounattend = pkgs.callPackage ./mkAutounattend.nix { };
 
   # Packer syntax helpers
   ref = pkgs.callPackage ./ref.nix { };

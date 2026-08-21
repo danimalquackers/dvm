@@ -64,13 +64,25 @@ let
         in
         debloat;
 
-      # Generate Autounattend answer file
-      autounattend = fun.templatefile ./Autounattend.xml.pkrtpl.hcl {
-        computerName = ref.var "computerName";
-        displayName = ref.var "displayName";
-        username = ref.var "username";
-        password = ref.var "password";
-        sku = ref.var "sku";
+      # Generate Autounattend answer file at Nix eval time (no HCL template needed)
+      autounattend = vmLib.mkAutounattend {
+        computerName = "DVM-Windows";
+        displayName = "Vagrant";
+        username = "vagrant";
+        password = "vagrant";
+        sku = "Windows 11 Pro";
+        windowsVersion = "w11";
+        firstLogonCommands = [
+          {
+            description = "Set Execution Policy 64 Bit";
+            commandLine = "cmd.exe /c powershell -Command \"Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force\"";
+            requiresUserInput = true;
+          }
+          {
+            description = "Enable WinRM";
+            commandLine = "cmd.exe /c C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File E:\\enable-winrm.ps1";
+          }
+        ];
       };
     };
 
@@ -105,7 +117,7 @@ let
 
       # Dynamically generated answer file and scripts
       cd_content = {
-        "Autounattend.xml" = ref.local "autounattend";
+        "Autounattend.xml" = fun.file (ref.local "autounattend");
         "enable-winrm.ps1" = fun.file ./enable-winrm.ps1;
       };
       cd_files = [

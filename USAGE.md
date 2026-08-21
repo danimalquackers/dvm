@@ -214,7 +214,7 @@ plugin = pkgs.mkPackerPlugin {
 
 ### `mkAutounattend`
 
-Generates an `Autounattend.xml` file for unattended Windows installations. This is a work-in-progress and is not documented.
+Generates an `Autounattend.xml` file for unattended Windows installations. This is a work-in-progress and is subject to change.
 
 ---
 
