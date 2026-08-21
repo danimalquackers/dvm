@@ -24,19 +24,21 @@ let
     };
 
     source = lib.mapAttrs (
-      _: provider:
+      pname: provider:
       lib.mapAttrs (
         _: source:
         source
-        // lib.optionalAttrs (source.efi_boot) {
-          # Conditionally inject the EFI firmware variables
-          efi_firmware_code = source.efi_firmware_code or ref.var "ovmf_code";
-          efi_firmware_vars = source.efi_firmware_vars or ref.var "ovmf_vars";
-        }
-        // {
-          # Override headless mode if unset
-          headless = source.headless or headless;
-        }
+        // lib.optionalAttrs (pname == "qemu") (
+          {
+            # Override headless mode if unset
+            headless = source.headless or headless;
+          }
+          // lib.optionalAttrs (source.efi_boot) {
+            # Conditionally inject the EFI firmware variables
+            efi_firmware_code = source.efi_firmware_code or ref.var "ovmf_code";
+            efi_firmware_vars = source.efi_firmware_vars or ref.var "ovmf_vars";
+          }
+        )
       ) provider
     ) generatedConfig.source;
   };
