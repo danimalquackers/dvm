@@ -34,8 +34,8 @@ pkgs.writeShellScriptBin "run-vm" ''
 
   MACHINE_TYPE="${machineType}"
   VIDEO_MODE="${display}"
-  DISABLE_KVM=${!kvm}
-  ENABLE_EFI=${efi}
+  DISABLE_KVM=${toString !kvm}
+  ENABLE_EFI=${toString efi}
   PORT_FORWARDS="${hostfwdFlags}"
   EXTRA_QEMU_ARGS=(${lib.escapeShellArgs extraArgs})
   RESET_OVERLAY=false
