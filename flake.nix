@@ -62,17 +62,6 @@
             inherit pkgs;
             inherit (pkgs) lib stdenv;
           };
-
-          # Define standard plugins using the library helper
-          qemuPlugin = vmLib.mkPackerPlugin {
-            name = "qemu";
-            version = "1.1.6";
-            hash = "sha256-m5TExlmdPxKnp45SjheMggnUNo1D3KMr+uV1zC2f3Ts=";
-            binaries = with pkgs; [
-              qemu_kvm
-              cdrtools
-            ];
-          };
         in
         rec {
           # Configure Nix syntax formatting
@@ -91,7 +80,7 @@
 
           packages =
             let
-              examples = pkgs.callPackage ./examples { inherit vmLib qemuPlugin; };
+              examples = pkgs.callPackage ./examples { inherit vmLib; };
             in
             {
               # Include example builders
@@ -101,8 +90,14 @@
                 ;
 
               # Expose Packer CLI
-              packer = vmLib.mkPacker [ qemuPlugin ];
+              packer = vmLib.mkPacker [ ];
             };
+
+          # Checks for CI and local validation
+          checks = {
+            # Ensure the packer package derives correctly
+            packer = packages.packer;
+          };
         };
     };
 }

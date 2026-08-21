@@ -6,8 +6,10 @@
 
 rec {
   # Core tools
-  mkPacker = pkgs.callPackage ./mkPacker.nix { };
   mkPackerPlugin = pkgs.callPackage ./mkPackerPlugin.nix { };
+  mkPacker = pkgs.callPackage ./mkPacker.nix {
+    inherit mkPackerPlugin;
+  };
 
   mkVmConfig = pkgs.callPackage ./mkVmConfig.nix { };
   mkVmBuilder = pkgs.callPackage ./mkVmBuilder.nix {

@@ -1,7 +1,6 @@
 {
   pkgs,
   vmLib,
-  qemuPlugin,
 }:
 
 let
@@ -176,13 +175,11 @@ in
     inherit config;
 
     name = "windows";
-    plugins = [ qemuPlugin ];
   };
 
   windows-debug = vmLib.mkVmBuilder {
     inherit config;
 
     name = "windows-debug";
-    plugins = [ qemuPlugin ];
   };
 }

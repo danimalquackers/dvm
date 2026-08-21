@@ -151,8 +151,7 @@ Then use the library functions directly from `pkgs`:
 
 ```nix
 pkgs.mkVmImage {
-  name = "overlay-vm";
-  plugins = [ qemuPlugin ];
+  name = "my-vm";
   config = {
     packer.required_plugins.qemu = {
       version = ">= 1.1.0";
