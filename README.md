@@ -16,123 +16,22 @@ A Nix library for building and running reproducible VM images using [Packer](htt
 ## Quick Start
 
 ```bash
-# Enter the development shell
-nix develop
-
 # Build a Windows VM image
 nix build .#windows
-
-# Build with a Packer CLI wrapper (includes QEMU plugin)
-nix build .#packer
 
 # Run a finished image
 ./result/bin/run-vm
 ```
 
-## Library API
+## Requirements
 
-### `mkVmImage`
+- **Nix** (with flakes enabled)
+- **KVM** — `/dev/kvm` must be accessible for hardware-accelerated builds
+- **QEMU** — installed via Nixpkgs
 
-Build a VM image as a Nix derivation (runs inside `nix build`, pushes output to the store):
+## Usage
 
-```nix
-pkgs.mkVmImage {
-  name = "my-vm";
-  plugins = [ qemuPlugin ];
-  config = {
-    packer.required_plugins.qemu = {
-      version = ">= 1.1.0";
-      source = "github.com/hashicorp/qemu";
-    };
-
-    source.qemu.myvm = {
-      iso_url = "...";
-      iso_checksum = "sha256:...";
-      # ... Packer QEMU source config ...
-    };
-
-    build.sources = [ "source.qemu.myvm" ];
-  };
-}
-```
-
-### `mkVmBuilder`
-
-Generate a `build-vm` script for interactive Packer debug builds (outputs to current directory):
-
-```nix
-pkgs.mkVmBuilder {
-  name = "my-vm-debug";
-  plugins = [ qemuPlugin ];
-  config = { /* ... */ };
-}
-```
-
-### `mkVmRunner`
-
-Create a `run-vm` script that launches a prebuilt VM image with a copy-on-write overlay:
-
-```nix
-pkgs.mkVmRunner {
-  name = "my-vm";
-  vmImage = ./path/to/image;
-  memMb = 4096;
-  cpus = 2;
-}
-```
-
-Run with `./result/bin/run-vm`. Supported optional flags:
-- `--disable-kvm` — fall back to TCG software emulation
-- `--reset-overlay` — discard any preexisting writable overlay and start fresh
-
-### `mkPackerPlugin`
-
-Wrap a HashiCorp Packer plugin as a Nix derivation:
-
-```nix
-mkPackerPlugin {
-  name = "qemu";
-  version = "1.1.6";
-  hash = "sha256-...";
-  binaries = [ pkgs.qemu_kvm ];
-}
-```
-
-Although this project was designed with the QEMU provider in mind, any offline provider can be used. Cloud providers are not supported because the build environment does not have Internet access.
-
-### `mkPacker`
-
-Bundle Packer with plugins:
-
-```nix
-pkgs.mkPacker [ qemuPlugin ]
-```
-
-### `mkVmConfig`
-
-Convert a Nix attribute set to a Packer JSON configuration file:
-
-```nix
-pkgs.mkVmConfig {
-  name = "my-vm";
-  config = ref: fun: { /* ... */ };
-}
-```
-
-## Examples
-
-The `examples/` directory contains ready-to-use configurations:
-
-| Package | Description |
-|---|---|
-| `windows` | Windows 11 with UEFI + WinRM |
-| `windows-debug` | Same as above with GUI console |
-
-Build any example with `nix build .#<name>`.
-
-## Using as a Library
-
-Begin by adding adding DVM as a flake input:
+Begin by adding DVM as a flake input:
 
 ```nix
 # flake.nix
@@ -188,11 +87,18 @@ Alternatively, instantiate the library directly with `pkgs`:
 }
 ```
 
-## Requirements
+See [USAGE.md](USAGE.md) for the full API reference, default values, and Nix build environment details.
 
-- **Nix** (with flakes enabled)
-- **KVM** — `/dev/kvm` must be accessible for hardware-accelerated builds
-- **QEMU** — installed via Nixpkgs (included in devShell)
+## Examples
+
+The [`examples/`](./examples) directory contains ready-to-use configurations:
+
+| Package | Description |
+|---|---|
+| `windows` | Windows 11 with UEFI + WinRM |
+| `windows-debug` | Same as above with GUI console |
+
+Build any example with `nix build .#<name>`. For `-debug` versions, use `nix run .#<name>` as these do not produce a derivation.
 
 ## Project Structure
 

@@ -94,7 +94,7 @@ pkgs.writeShellScriptBin "run-vm" ''
 
   # Support SPICE and headless VMs
   VIDEO_FLAGS="-vga std"
-  if [ "$VIDEO_MODE" = "qxl" ]; then
+  if [ "$VIDEO_MODE" = "spice" ]; then
     VIDEO_FLAGS="-vga qxl -spice port=5900,disable-ticketing"
   elif [ "$VIDEO_MODE" = "none" ]; then
     VIDEO_FLAGS="-vga std -display none"
