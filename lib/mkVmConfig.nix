@@ -22,15 +22,19 @@ let
       ovmf_vars = "${pkgs.OVMF.fd}/FV/OVMF_VARS.fd";
     };
 
-    # Conditionally inject the EFI firmware variables if EFI boot is enabled
     source = lib.mapAttrs (
       _: provider:
       lib.mapAttrs (
         _: source:
         source
         // lib.optionalAttrs (source.efi_boot) {
-          efi_firmware_code = "\${var.ovmf_code}";
-          efi_firmware_vars = "\${var.ovmf_vars}";
+          # Conditionally inject the EFI firmware variables
+          efi_firmware_code = ref.var "ovmf_code";
+          efi_firmware_vars = ref.var "ovmf_vars";
+        }
+        // {
+          # Enforce headless mode unless otherwise specified
+          headless = source.headless or true;
         }
       ) provider
     ) generatedConfig.source;
