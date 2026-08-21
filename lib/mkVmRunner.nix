@@ -71,7 +71,7 @@ pkgs.writeShellScriptBin "run-vm" ''
   # Create a QCOW2 overlay pointing to the immutable base image in store
   if [ ! -f "$OVERLAY_DISK" ]; then
     echo "Creating a copy-on-write overlay disk at $OVERLAY_DISK"
-    ${lib.getExe pkgs.qemu-img} create \
+    ${lib.getExe' pkgs.qemu "qemu-img"} create \
       -f qcow2 \
       -b "${image}" \
       -F qcow2 \
@@ -108,7 +108,7 @@ pkgs.writeShellScriptBin "run-vm" ''
   NETDEV_FLAGS+=" -device virtio-net-pci,netdev=net0"
 
   echo "Launching Virtual Machine ${name}..."
-  exec ${lib.getExe' pkgs.qemu_kvm "qemu-system-" + arch} \
+  exec ${lib.getExe' pkgs.qemu "qemu-system-" + arch} \
     -m ${toString mem} \
     -smp ${toString cpus} \
     -M ''${MACHINE_TYPE} \
