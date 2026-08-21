@@ -61,7 +61,7 @@ pkgs.mkVmImage {
 Generate a `build-vm` script for interactive Packer debug builds (outputs to current directory):
 
 ```nix
-vmLib.mkVmBuilder {
+pkgs.mkVmBuilder {
   name = "my-vm-debug";
   plugins = [ qemuPlugin ];
   config = { /* ... */ };
@@ -73,7 +73,7 @@ vmLib.mkVmBuilder {
 Create a `run-vm` script that launches a prebuilt VM image with a copy-on-write overlay:
 
 ```nix
-vmLib.mkVmRunner {
+pkgs.mkVmRunner {
   name = "my-vm";
   vmImage = ./path/to/image;
   memMb = 4096;
@@ -90,7 +90,7 @@ Run with `./result/bin/run-vm`. Supported optional flags:
 Wrap a HashiCorp Packer plugin as a Nix derivation:
 
 ```nix
-vmLib.mkPackerPlugin {
+mkPackerPlugin {
   name = "qemu";
   version = "1.1.6";
   hash = "sha256-...";
@@ -105,7 +105,7 @@ Although this project was designed with the QEMU provider in mind, any offline p
 Bundle Packer with plugins:
 
 ```nix
-vmLib.mkPacker [ qemuPlugin ]
+pkgs.mkPacker [ qemuPlugin ]
 ```
 
 ### `mkVmConfig`
@@ -113,7 +113,7 @@ vmLib.mkPacker [ qemuPlugin ]
 Convert a Nix attribute set to a Packer JSON configuration file:
 
 ```nix
-vmLib.mkVmConfig {
+pkgs.mkVmConfig {
   name = "my-vm";
   config = ref: fun: { /* ... */ };
 }
@@ -132,47 +132,61 @@ Build any example with `nix build .#<name>`.
 
 ## Using as a Library
 
-Add DVM as a flake input, then instantiate the library with your `pkgs`:
+Begin by adding adding DVM as a flake input:
 
 ```nix
 # flake.nix
-{
-  inputs.dvm.url = "path:/to/dvm";
-
-  outputs = inputs@{ ... }:
-    let
-      pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
-      vmLib = inputs.dvm.lib {
-        inherit pkgs;
-        inherit (pkgs) lib stdenv;
-      };
-    in {
-      # use vmLib.mkVmImage, vmLib.mkVmRunner, etc.
-    };
-}
+{ inputs.dvm.url = "github:danimalquackers/dvm"; }
 ```
 
-Alternatively, add DVM as a Nixpkgs overlay:
+And importing the DVM Nixpkgs overlay:
 
 ```nix
-# flake.nix
-{ inputs.dvm.url = "path:/to/dvm"; }
-
-...
-
 { pkgs, ... }: {
   nixpkgs.overlays = [ inputs.dvm.overlays.default ];
 }
 ```
 
-With the overlay, you can then use the library functions directly from `pkgs`:
+Then use the library functions directly from `pkgs`:
 
 ```nix
 pkgs.mkVmImage {
   name = "overlay-vm";
   plugins = [ qemuPlugin ];
   config = {
-...
+    packer.required_plugins.qemu = {
+      version = ">= 1.1.0";
+      source = "github.com/hashicorp/qemu";
+    };
+
+    source.qemu.myvm = {
+      iso_url = "...";
+      iso_checksum = "sha256:...";
+      # ... Packer QEMU source config ...
+    };
+
+    build.sources = [ "source.qemu.myvm" ];
+  };
+}
+```
+
+Alternatively, instantiate the library directly with `pkgs`:
+
+```nix
+# flake.nix
+{
+  inputs.dvm.url = "github:danimalquackers/dvm";
+
+  outputs = inputs@{ ... }:
+    let
+      pkgs = import inputs.nixpkgs { system = "x86_64-linux"; };
+      vmLib = inputs.dvm.lib {
+        inherit pkgs;
+      };
+    in {
+      # use vmLib.mkVmImage, vmLib.mkVmRunner, etc.
+    };
+}
 ```
 
 ## Requirements
