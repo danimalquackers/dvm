@@ -23,8 +23,13 @@ let
   toHCLArg =
     arg:
     if builtins.isString arg then
+      # Quote and escape the string
       toHCLString arg
+    else if builtins.isPath arg then
+      # Copy the file to make sure it gets added to the build source
+      toHCLString (builtins.toFile (builtins.baseNameOf arg) (builtins.readFile arg))
     else if lib.isAttrs arg then
+      # Serialize using a custom HCL2-format dictionary builder
       toHCLDict arg
     else
       toString arg;
@@ -32,28 +37,28 @@ let
 in
 {
   # String Functions
-  chomp = string: "\${chomp(${toHCLString string})}";
-  format = spec: values: "\${format(${toHCLString spec}, ${toHCLArgs values})}";
-  formatlist = spec: values: "\${formatlist(${toHCLString spec}, ${toHCLArgs values})}";
-  indent = num_spaces: string: "\${indent(${toString num_spaces}, ${toHCLString string})}";
-  join = separator: list: "\${join(${toHCLString separator}, ${toHCLArg list})}";
-  lower = string: "\${lower(${toHCLString string})}";
-  regex = pattern: string: "\${regex(${toHCLString pattern}, ${toHCLString string})}";
-  regexall = pattern: string: "\${regexall(${toHCLString pattern}, ${toHCLString string})}";
+  chomp = string: "\${chomp(${toHCLArg string})}";
+  format = spec: values: "\${format(${toHCLArg spec}, ${toHCLArgs values})}";
+  formatlist = spec: values: "\${formatlist(${toHCLArg spec}, ${toHCLArgs values})}";
+  indent = num_spaces: string: "\${indent(${toHCLArg num_spaces}, ${toHCLArg string})}";
+  join = separator: list: "\${join(${toHCLArg separator}, ${toHCLArg list})}";
+  lower = string: "\${lower(${toHCLArg string})}";
+  regex = pattern: string: "\${regex(${toHCLArg pattern}, ${toHCLArg string})}";
+  regexall = pattern: string: "\${regexall(${toHCLArg pattern}, ${toHCLArg string})}";
   replace =
     string: substring: replacement:
-    "\${replace(${toHCLString string}, ${toHCLString substring}, ${toHCLString replacement})}";
-  split = separator: string: "\${split(${toHCLString separator}, ${toHCLString string})}";
-  strrev = string: "\${strrev(${toHCLString string})}";
+    "\${replace(${toHCLArg string}, ${toHCLArg substring}, ${toHCLArg replacement})}";
+  split = separator: string: "\${split(${toHCLArg separator}, ${toHCLArg string})}";
+  strrev = string: "\${strrev(${toHCLArg string})}";
   substr =
     string: offset: length:
-    "\${substr(${toHCLString string}, ${toString offset}, ${toString length})}";
-  title = string: "\${title(${toHCLString string})}";
-  trim = string: cutset: "\${trim(${toHCLString string}, ${toHCLString cutset})}";
-  trimprefix = string: prefix: "\${trimprefix(${toHCLString string}, ${toHCLString prefix})}";
-  trimsuffix = string: suffix: "\${trimsuffix(${toHCLString string}, ${toHCLString suffix})}";
-  trimspace = string: "\${trimspace(${toHCLString string})}";
-  upper = string: "\${upper(${toHCLString string})}";
+    "\${substr(${toHCLArg string}, ${toString offset}, ${toString length})}";
+  title = string: "\${title(${toHCLArg string})}";
+  trim = string: cutset: "\${trim(${toHCLArg string}, ${toHCLArg cutset})}";
+  trimprefix = string: prefix: "\${trimprefix(${toHCLArg string}, ${toHCLArg prefix})}";
+  trimsuffix = string: suffix: "\${trimsuffix(${toHCLArg string}, ${toHCLArg suffix})}";
+  trimspace = string: "\${trimspace(${toHCLArg string})}";
+  upper = string: "\${upper(${toHCLArg string})}";
 
   # Collection & List Functions
   chunklist = list: size: "\${chunklist(${toHCLArg list}, ${toString size})}";
@@ -70,72 +75,72 @@ in
   length = container: "\${length(${toHCLArg container})}";
   lookup =
     map: key: default:
-    "\${lookup(${toHCLArg map}, ${toHCLString key}, ${toHCLArg default})}";
+    "\${lookup(${toHCLArg map}, ${toHCLArg key}, ${toHCLArg default})}";
   matchkeys =
     values: keys: search_keys:
     "\${matchkeys(${toHCLArg values}, ${toHCLArg keys}, ${toHCLArg search_keys})}";
   merge = maps: "\${merge(${toHCLArgs maps})}";
   range =
     start: limit: step:
-    "\${range(${toString start}, ${toString limit}, ${toString step})}";
+    "\${range(${toHCLArg start}, ${toHCLArg limit}, ${toHCLArg step})}";
   reverse = list: "\${reverse(${toHCLArg list})}";
   setintersection = sets: "\${setintersection(${toHCLArgs sets})}";
   setproduct = sets: "\${setproduct(${toHCLArgs sets})}";
   setunion = sets: "\${setunion(${toHCLArgs sets})}";
   slice =
     list: start: end:
-    "\${slice(${toHCLArg list}, ${toString start}, ${toString end})}";
+    "\${slice(${toHCLArg list}, ${toHCLArg start}, ${toHCLArg end})}";
   sort = list: "\${sort(${toHCLArg list})}";
   transpose = map: "\${transpose(${toHCLArg map})}";
   values = map: "\${values(${toHCLArg map})}";
   zipmap = keys_list: values_list: "\${zipmap(${toHCLArg keys_list}, ${toHCLArg values_list})}";
 
   # Numeric & Math Functions
-  abs = number: "\${abs(${toString number})}";
-  ceil = number: "\${ceil(${toString number})}";
-  floor = number: "\${floor(${toString number})}";
-  log = number: base: "\${log(${toString number}, ${toString base})}";
-  max = numbers: "\${max(${lib.concatStringsSep ", " (map toString numbers)})}";
-  min = numbers: "\${min(${lib.concatStringsSep ", " (map toString numbers)})}";
-  pow = number: exponent: "\${pow(${toString number}, ${toString exponent})}";
-  signum = number: "\${signum(${toString number})}";
+  abs = number: "\${abs(${toHCLArg number})}";
+  ceil = number: "\${ceil(${toHCLArg number})}";
+  floor = number: "\${floor(${toHCLArg number})}";
+  log = number: base: "\${log(${toHCLArg number}, ${toHCLArg base})}";
+  max = numbers: "\${max(${lib.concatStringsSep ", " (map toHCLArg numbers)})}";
+  min = numbers: "\${min(${lib.concatStringsSep ", " (map toHCLArg numbers)})}";
+  pow = number: exponent: "\${pow(${toHCLArg number}, ${toHCLArg exponent})}";
+  signum = number: "\${signum(${toHCLArg number})}";
 
   # Encoding & Decoding Functions
-  base64decode = string: "\${base64decode(${toHCLString string})}";
-  base64encode = string: "\${base64encode(${toHCLString string})}";
-  base64gzip = string: "\${base64gzip(${toHCLString string})}";
-  csvdecode = string: "\${csvdecode(${toHCLString string})}";
-  jsondecode = string: "\${jsondecode(${toHCLString string})}";
+  base64decode = string: "\${base64decode(${toHCLArg string})}";
+  base64encode = string: "\${base64encode(${toHCLArg string})}";
+  base64gzip = string: "\${base64gzip(${toHCLArg string})}";
+  csvdecode = string: "\${csvdecode(${toHCLArg string})}";
+  jsondecode = string: "\${jsondecode(${toHCLArg string})}";
   jsonencode = value: "\${jsonencode(${toHCLArg value})}";
-  urlencode = string: "\${urlencode(${toHCLString string})}";
-  yamldecode = string: "\${yamldecode(${toHCLString string})}";
+  urlencode = string: "\${urlencode(${toHCLArg string})}";
+  yamldecode = string: "\${yamldecode(${toHCLArg string})}";
   yamlencode = value: "\${yamlencode(${toHCLArg value})}";
 
   # Filesystem & Path Functions
-  abspath = path: "\${abspath(${toHCLString path})}";
-  basename = path: "\${basename(${toHCLString path})}";
-  dirname = path: "\${dirname(${toHCLString path})}";
-  file = path: "\${file(${toHCLString path})}";
-  filebase64 = path: "\${filebase64(${toHCLString path})}";
-  fileexists = path: "\${fileexists(${toHCLString path})}";
-  fileglob = pattern: "\${fileglob(${toHCLString pattern})}";
-  fileset = path: pattern: "\${fileset(${toHCLString path}, ${toHCLString pattern})}";
-  pathexpand = path: "\${pathexpand(${toHCLString path})}";
-  templatefile = path: vars: "\${templatefile(${toHCLString path}, ${toHCLArg vars})}";
+  abspath = path: "\${abspath(${toHCLArg path})}";
+  basename = path: "\${basename(${toHCLArg path})}";
+  dirname = path: "\${dirname(${toHCLArg path})}";
+  file = path: "\${file(${toHCLArg path})}";
+  filebase64 = path: "\${filebase64(${toHCLArg path})}";
+  fileexists = path: "\${fileexists(${toHCLArg path})}";
+  fileglob = pattern: "\${fileglob(${toHCLArg pattern})}";
+  fileset = path: pattern: "\${fileset(${toHCLArg path}, ${toHCLArg pattern})}";
+  pathexpand = path: "\${pathexpand(${toHCLArg path})}";
+  templatefile = path: vars: "\${templatefile(${toHCLArg path}, ${toHCLArg vars})}";
 
   # Crypto & Hash Functions
-  bcrypt = string: cost: "\${bcrypt(${toHCLString string}, ${toString cost})}";
-  md5 = string: "\${md5(${toHCLString string})}";
+  bcrypt = string: cost: "\${bcrypt(${toHCLArg string}, ${toString cost})}";
+  md5 = string: "\${md5(${toHCLArg string})}";
   rsadecrypt =
-    ciphertext: private_key: "\${rsadecrypt(${toHCLString ciphertext}, ${toHCLString private_key})}";
-  sha1 = string: "\${sha1(${toHCLString string})}";
-  sha256 = string: "\${sha256(${toHCLString string})}";
-  sha512 = string: "\${sha512(${toHCLString string})}";
+    ciphertext: private_key: "\${rsadecrypt(${toHCLArg ciphertext}, ${toHCLArg private_key})}";
+  sha1 = string: "\${sha1(${toHCLArg string})}";
+  sha256 = string: "\${sha256(${toHCLArg string})}";
+  sha512 = string: "\${sha512(${toHCLArg string})}";
   uuid = "\${uuid()}";
-  uuidv5 = namespace: name: "\${uuidv5(${toHCLString namespace}, ${toHCLString name})}";
+  uuidv5 = namespace: name: "\${uuidv5(${toHCLArg namespace}, ${toHCLArg name})}";
 
   # Date & Time Functions
-  formatdate = spec: timestamp: "\${formatdate(${toHCLString spec}, ${toHCLString timestamp})}";
-  timeadd = timestamp: duration: "\${timeadd(${toHCLString timestamp}, ${toHCLString duration})}";
+  formatdate = spec: timestamp: "\${formatdate(${toHCLArg spec}, ${toHCLArg timestamp})}";
+  timeadd = timestamp: duration: "\${timeadd(${toHCLArg timestamp}, ${toHCLArg duration})}";
   timestamp = "\${timestamp()}";
 }
