@@ -6,6 +6,7 @@
 {
   name,
   config,
+  headless ? true,
 }:
 
 let
@@ -33,8 +34,8 @@ let
           efi_firmware_vars = ref.var "ovmf_vars";
         }
         // {
-          # Enforce headless mode unless otherwise specified
-          headless = source.headless or true;
+          # Override headless mode if unset
+          headless = source.headless or headless;
         }
       ) provider
     ) generatedConfig.source;

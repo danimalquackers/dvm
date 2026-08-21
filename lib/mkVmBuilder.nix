@@ -12,7 +12,12 @@
 
 let
   customPacker = mkPacker plugins;
-  configFile = mkVmConfig { inherit name config; };
+
+  configFile = mkVmConfig {
+    inherit name config;
+
+    headless = false;
+  };
 in
 pkgs.writeShellScriptBin "build-vm" ''
   # bash
