@@ -12,6 +12,7 @@ let
       sku = "Windows 11 Pro";
       disk_size = "61440";
       memory = 4096;
+      cpus = 2;
 
       # User configuration
       displayName = "Vagrant";
@@ -23,7 +24,7 @@ let
       vm_name = "windows.qcow2";
 
       # Connection settings
-      winrm_timeout = "6h";
+      winrm_timeout = "30m";
     };
 
     locals = {
@@ -86,7 +87,7 @@ let
       boot_wait = "2s";
 
       # Hardware configuration
-      cpus = "2";
+      cpus = ref.var "cpus";
       cpu_model = "host";
       memory = ref.var "memory";
       disk_size = ref.var "disk_size";
@@ -114,9 +115,9 @@ let
 
       # Packer connection settings
       communicator = "winrm";
+      winrm_username = ref.var "username";
       winrm_password = ref.var "password";
       winrm_timeout = ref.var "winrm_timeout";
-      winrm_username = ref.var "username";
 
       qemuargs = [
         # Virtio drivers disk
@@ -142,7 +143,7 @@ let
       provisioner = [
         {
           # Install QEMU guest tools
-          powershell = {
+          windows-shell = {
             inline = [
               "msiexec /i F:\\guest-agent\\qemu-ga-x86_64.msi /qn /norestart"
             ];
