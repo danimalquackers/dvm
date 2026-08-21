@@ -103,13 +103,13 @@ pkgs.writeShellScriptBin "run-vm" ''
   # Port-forwarding flags are generated statically by Nix at eval time.
   NETDEV_FLAGS="-netdev user,id=net0"
   if [ "$PORT_FORWARDS" != "" ]; then
-    NETDEV_FLAGS+=",${PORT_FORWARDS}"
+    NETDEV_FLAGS+=",$PORT_FORWARDS"
   fi
   NETDEV_FLAGS+=" -device virtio-net-pci,netdev=net0"
 
   echo "Launching Virtual Machine ${name}..."
   exec ${lib.getExe' pkgs.qemu_kvm "qemu-system-" + arch} \
-    -m ${toString memMb} \
+    -m ${toString mem} \
     -smp ${toString cpus} \
     -M ''${MACHINE_TYPE} \
     -drive file="$OVERLAY_DISK",format=qcow2,if=virtio \
