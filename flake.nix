@@ -32,7 +32,7 @@
       # Overlay adding the helper functions to pkgs.*
       flake.overlays.default =
         prev: next:
-        builtins.mapAttrs (name: value: value) self.lib {
+        self.lib {
           pkgs = prev;
           lib = prev.lib;
           stdenv = prev.stdenv;
