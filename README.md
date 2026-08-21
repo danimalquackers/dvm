@@ -4,13 +4,14 @@ A Nix library for building and running reproducible VM images using [Packer](htt
 
 ## Features
 
-- **Pure builds** — VM images are Nix derivations stored in the Nix store
-- **Full Packer language support** - Nix attribute sets are converted to Packer HCL2 JSON configuration files for full Packer language support, with wrappers for easier function calling
+- **Pure builds** — VM images are Nix derivations stored read-only in the Nix store
+- **Full Packer language support** - Nix attribute sets are converted to Packer HCL2 JSON configuration files, with wrappers for easier function calling and references
+- **Plugin support** - Supports any offline Packer plugins, not just QEMU/KVM
 - **Nixpkgs overlay** - Add `mkVmConfig`, `mkVmImage`, and more to `pkgs` for easy invocation
-- **Copy-on-write overlays** — Immutable base images with per-run writable overlays via `mkVmRunner`
+- **Copy-on-write overlays** — Immutable base images with per-VM writable overlays via `mkVmRunner`
 - **KVM acceleration** — Full hardware virtualization with automatic TCG fallback
-- **Multi-OS support** — Built-in examples for NixOS (planned), Ubuntu (planned), and Windows
-- **Headless & interactive** — Debug variants with GUI support for any VM configuration
+- **Multi-OS support** — Built-in examples for NixOS (in progress), Ubuntu (in progress), and Windows
+- **Headless & interactive** — Run impure VM builds with a GUI for troubleshooting
 
 ## Quick Start
 
