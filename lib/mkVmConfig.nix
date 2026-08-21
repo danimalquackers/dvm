@@ -4,7 +4,6 @@
 }:
 
 {
-  name,
   config,
   headless ? true,
 }:
@@ -44,4 +43,4 @@ let
   };
 in
 # Converts Nix attribute sets and lists into Packer-compatible HCL2 JSON
-pkgs.writeText "${name}-packer.pkr.json" (builtins.toJSON patchedConfig)
+pkgs.writeText "packer.pkr.json" (builtins.toJSON patchedConfig)

@@ -5,7 +5,6 @@
 }:
 
 {
-  name,
   config,
   plugins ? [ ],
 }:
@@ -14,7 +13,7 @@ let
   customPacker = mkPacker plugins;
 
   configFile = mkVmConfig {
-    inherit name config;
+    inherit config;
 
     headless = false;
   };

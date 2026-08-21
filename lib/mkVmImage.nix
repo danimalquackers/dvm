@@ -15,7 +15,7 @@
 let
   customPacker = mkPacker plugins;
   configFile = mkVmConfig {
-    inherit name config;
+    inherit config;
   };
 in
 pkgs.stdenv.mkDerivation {

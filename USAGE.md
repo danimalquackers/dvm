@@ -12,7 +12,6 @@ Converts a Nix attribute set to a Packer-compatible HCL2 JSON configuration (`.p
 
 ```nix
 vmConfig = pkgs.mkVmConfig {
-  name = "my-config";
   config = {
     variables = [ ... ];
     sources = { ... };
@@ -28,7 +27,6 @@ vmConfig = pkgs.mkVmConfig {
 
 **Required Fields:**
 
-- `name` - Largely unused, preserved for legacy reasons
 - `config` - The Packer configuration written in Nix but matching the Packer HCL2 schema. `config` is not type safe and will accept any Nix input without warnings or validation. However, Packer will throw errors for invalid syntax.
 
 **Defaults:**
@@ -82,7 +80,6 @@ Generates a standalone `build-vm` script for interactive, non-pure debugging of 
 
 ```nix
 vmBuilder = pkgs.mkVmBuilder {
-  name = "my-image";
   config = { ... };
 
   # optional
@@ -92,7 +89,6 @@ vmBuilder = pkgs.mkVmBuilder {
 
 **Required fields:**
 
-- `name` - Unused, passed to `mkVmConfig`
 - `config` - A Packer configuration attribute set (passed to `mkVmConfig`)
 
 **Optional fields:**
