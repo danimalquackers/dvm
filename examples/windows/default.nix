@@ -24,7 +24,7 @@ let
       vm_name = "windows.qcow2";
 
       # Connection settings
-      winrm_timeout = "30m";
+      winrm_timeout = "1h";
     };
 
     locals = {
