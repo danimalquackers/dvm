@@ -24,6 +24,9 @@ pkgs.writeShellScriptBin "build-vm" ''
 
   set -e
 
+  # Enable additional output for debugging
+  export PACKER_LOG=1
+
   # Run Packer using the wrapped binary and generated JSON config
   ${customPacker}/bin/packer build ${configFile}
 ''
