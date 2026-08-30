@@ -55,8 +55,8 @@ pkgs.stdenv.mkDerivation {
   installPhase = ''
     # bash
 
-    # Copy the qcow2 image into the derivation output
+    # Copy build artifacts into the derivation output
     mkdir -p $out
-    cp -r output/* $out/
+    cp -r output-*/* $out/
   '';
 }
