@@ -5,6 +5,7 @@
 }:
 
 {
+  name,
   config,
   plugins ? [ ],
 }:
@@ -18,7 +19,7 @@ let
     headless = false;
   };
 in
-pkgs.writeShellScriptBin "build-vm" ''
+pkgs.writeShellScriptBin "build-${name}-vm" ''
   # bash
 
   set -e

@@ -191,5 +191,7 @@ in
 
   windows-debug = vmLib.mkVmBuilder {
     inherit config;
+
+    name = "windows-debug";
   };
 }

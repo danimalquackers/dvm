@@ -89,6 +89,7 @@ vmBuilder = pkgs.mkVmBuilder {
 
 **Required fields:**
 
+- `name` - VM name, used for build script naming
 - `config` - A Packer configuration attribute set (passed to `mkVmConfig`)
 
 **Optional fields:**
