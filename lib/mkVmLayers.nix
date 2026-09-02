@@ -32,28 +32,31 @@ let
       ref = pkgs.callPackage ./ref.nix { };
       fun = pkgs.callPackage ./fun.nix { };
 
-      # Use the user-provided function to link to the previous stage
-      chained = if prevImage == null then { } else chain ref fun prevImage;
+      # Derive the store path for the previous image
+      prevDrvPath =
+        if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.drvPath;
 
-      # Resolve and merge the configs from the base, chain, and current stage
-      config =
-        ref: fun: lib.recursiveUpdate (lib.recursiveUpdate (base ref fun) chained) (stage.config ref fun);
+      # Use the user-provided function to link to the previous stage
+      chained = prev: if prev == null then { } else chain ref fun prev;
+
+      # Resolve and merge the configs from the base and current stage
+      config = ref: fun: lib.recursiveUpdate (base ref fun) (stage.config ref fun);
 
       # Build the current stage using the provided suffix
       image = mkVmImage {
-        inherit config useKVM plugins;
+        inherit useKVM plugins;
 
         name = "${name}-${stage.name}";
+        config = lib.recursiveUpdate config (chained prevImage);
       };
 
+      # Create a builder for each layer that lazily builds prior stages
       builder = mkVmBuilder {
-        inherit config useKVM plugins;
+        inherit useKVM plugins;
 
         name = "${name}-${stage.name}";
+        config = lib.recursiveUpdate config (chained prevDrvPath);
       };
-
-      prevDrvPath =
-        if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.drvPath;
     in
     {
       prevImage = image;
@@ -70,10 +73,9 @@ let
                 set -e
 
                 echo "Building previous stage's image..." >&2
-                BASE_IMAGE_DIR="$(nix-store --realise '${prevDrvPath}')"
-                BASE_IMAGE="$BASE_IMAGE_DIR/${vmName}"
+                nix-store --realise '${prevDrvPath}'
 
-                exec ${builder}/bin/build-${name}-${stage.name}-vm -var "base_image=$BASE_IMAGE" "$@"
+                exec ${builder}/bin/build-${name}-${stage.name}-vm "$@"
               '';
 
         }
