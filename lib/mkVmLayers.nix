@@ -47,14 +47,31 @@ let
 
         name = "${name}-${stage.name}";
       };
+
+      prevDrvPath =
+        if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.drvPath;
     in
     {
       prevImage = image;
       builders = builders ++ [
         {
-          inherit builder;
-
           name = stage.name;
+
+          builder =
+            if prevImage == null then
+              builder
+            else
+              pkgs.writeShellScriptBin "build-${name}-${stage.name}-vm" ''
+                # bash
+                set -e
+
+                echo "Building previous stage's image..." >&2
+                BASE_IMAGE_DIR="$(nix-store --realise '${prevDrvPath}')"
+                BASE_IMAGE="$BASE_IMAGE_DIR/${vmName}"
+
+                exec ${builder}/bin/build-${name}-${stage.name}-vm -var "base_image=$BASE_IMAGE" "$@"
+              '';
+
         }
       ];
       images = images ++ [
