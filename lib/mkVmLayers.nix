@@ -40,14 +40,14 @@ let
       chained = prev: if prev == null then { } else chain ref fun prev;
 
       # Resolve and merge the configs from the base and current stage
-      config = ref: fun: lib.recursiveUpdate (base ref fun) (stage.config ref fun);
+      config = lib.recursiveUpdate (base ref fun) (stage.config ref fun);
 
       # Build the current stage using the provided suffix
       image = mkVmImage {
         inherit useKVM plugins;
 
         name = "${name}-${stage.name}";
-        config = lib.recursiveUpdate config (chained prevImage);
+        config = ref: fun: lib.recursiveUpdate config (chained prevImage);
       };
 
       # Create a builder for each layer that lazily builds prior stages
@@ -55,7 +55,7 @@ let
         inherit plugins;
 
         name = "${name}-${stage.name}";
-        config = lib.recursiveUpdate config (chained prevDrvPath);
+        config = ref: fun: lib.recursiveUpdate config (chained prevDrvPath);
       };
     in
     {
