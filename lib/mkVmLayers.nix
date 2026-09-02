@@ -52,7 +52,7 @@ let
 
       # Create a builder for each layer that lazily builds prior stages
       builder = mkVmBuilder {
-        inherit useKVM plugins;
+        inherit plugins;
 
         name = "${name}-${stage.name}";
         config = lib.recursiveUpdate config (chained prevDrvPath);
