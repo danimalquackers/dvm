@@ -29,6 +29,9 @@ let
     }:
     stage:
     let
+      ref = pkgs.callPackage ./ref.nix { };
+      fun = pkgs.callPackage ./fun.nix { };
+
       # Use the user-provided function to link to the previous stage
       chained = if prevImage == null then { } else chain ref fun prevImage;
 
