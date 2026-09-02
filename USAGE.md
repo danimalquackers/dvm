@@ -157,6 +157,61 @@ The `run-vm` script produced by this derivation provides the following runtime f
 
 ---
 
+### `mkVmLayers`
+
+Build a chain of multi-stage VM images, where each stage extends the previous one. Useful for multi-step setups (e.g., base OS → drivers → applications). This also takes advantage of Nix build caching, similar to Dockerfile layers.
+
+**Usage:**
+
+```nix
+pkgs.mkVmLayers {
+  name = "my-vm";
+  base = ref: fun: {
+    /* shared base config */
+  };
+  chain = ref: fun: prevImage: {
+    /* config snippet dynamically referencing previous stage */
+  };
+  stages = [
+    { name = "base-os"; config = ref: fun: { /* stage 1 */; }; }
+    { name = "drivers"; config = ref: fun: { /* stage 2 */; }; }
+    { name = "apps"; config = ref: fun: { /* stage 3 */; }; }
+  ];
+
+  # optional
+  useKVM = true;
+  plugins = [ ];
+}
+```
+
+**Required:**
+
+- `name` — Prefix for derived image names (`<name>-<stage>`)
+- `base` — Base Packer config function (`ref: fun: { ... }`) merged into every stage
+- `chain` — Function (`ref: fun: prevImage: { ... }`) that produces config referencing the previous stage's image. Empty `{ }` for the first stage.
+- `stages` — List of `{ name, config }` objects, each with a stage name and a Packer config function, merged with the base and chain configs
+
+**Optional:**
+
+- `useKVM` - Use KVM acceleration while building the image, defaults to `true` (recommended)
+- `plugins` - Packer plugins needed for the build, the Packer QEMU plugin is used if unset
+
+
+**Notes:**
+
+- Each stage's final config is: `base` ← `chained` ← `stage.config` (rightmost wins on conflicts).
+- The final images is available as `.final`. Each stage also produces images in `.images.<stage>`, and runtime builders are available as `.builders.<stage>`.
+
+**Returned attributes:**
+
+| Attribute | Description |
+|---|---|
+| `final` | The last stage's `mkVmImage` derivation |
+| `images` | Attribute set mapping stage name → image derivation |
+| `builders` | Attribute set mapping stage name → builder script derivation |
+
+---
+
 ## Helper Modules
 
 ### `mkPacker`

@@ -18,6 +18,9 @@ rec {
   mkVmImage = pkgs.callPackage ./mkVmImage.nix {
     inherit mkPacker mkVmConfig;
   };
+  mkVmLayers = pkgs.callPackage ./mkVmLayers.nix {
+    inherit mkVmBuilder mkVmImage;
+  };
   mkVmRunner = pkgs.callPackage ./mkVmRunner.nix { };
   mkAutounattend = pkgs.callPackage ./mkAutounattend.nix { };
 
