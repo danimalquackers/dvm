@@ -145,7 +145,7 @@ let
       baseCommands = lib.filter (x: x != null) [
         {
           description = "Disable password expiration for ${username} user";
-          commandLine = "cmd.exe /c wmic useraccount where \"name='${username}'\" set PasswordExpires=FALSE";
+          commandLine = "cmd.exe /c powershell -Command \"Set-LocalUser -Name '${username}' -PasswordNeverExpires $true\"";
         }
         {
           description = "Enable AutoLogon Password";
