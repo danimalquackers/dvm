@@ -270,7 +270,107 @@ plugin = pkgs.mkPackerPlugin {
 
 ### `mkAutounattend`
 
-Generates an `Autounattend.xml` file for unattended Windows installations. This is a work-in-progress and is subject to change.
+Generates an `Autounattend.xml` file for unattended Windows installations with sensible defaults and maximum flexibility.
+
+**Usage:**
+
+```nix
+autounattend = pkgs.mkAutounattend {
+  system.computerName = "DVM-Windows";
+  image.sku = "Windows 11 Pro";
+
+  # User Configuration
+  users = [
+    {
+      username = "vagrant";
+      password = "vagrant";
+      displayName = "Vagrant";
+      group = "administrators";
+    }
+  ];
+
+  # VirtIO Drivers
+  virtio.version = "w11";
+
+  # Security & UAC
+  enableLUA = true; # Set false to disable UAC prompts, or null to omit LUA settings
+
+  # Partitioning Options
+  diskConfig = {
+    efiSize = 100;
+    msrSize = 16;
+    label = "Windows";
+  };
+
+  # Commands Per Phase
+  commands = {
+    windowsPE = [ ];
+    specialize = [ ];
+    oobeSystem = [ ];
+    firstLogon = [
+      {
+        description = "Enable WinRM";
+        commandLine = "cmd.exe /c C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File E:\\enable-winrm.ps1";
+      }
+    ];
+  };
+};
+```
+
+**Optional:**
+
+- `system` - System identity and localization options, defaults to `{ }`.
+  - `computerName` - Host computer name (defaults to `"DVM-Windows"`).
+  - `timeZone` - Time zone name (defaults to `"Pacific Standard Time"`).
+  - `locale` - System locale (defaults to `"en-US"`).
+  - `registeredOwner` - Registered owner string (defaults to `""`).
+  - `registeredOrganization` - Registered organization string (defaults to `""`).
+- `image` - OS image & SKU selection options, defaults to `{ }`.
+  - `sku` - Windows edition name matching ISO metadata (defaults to `"Windows 11 Pro"`).
+  - `index` - Optional OS image index in WIM/ISO (defaults to `null`).
+  - `metaData` - Explicit custom image metadata key/value set (defaults to `null`).
+- `users` - List of user account attrsets, defaults to a single `vagrant` user account.
+  - `username` (or `name`) - Account username (defaults to `"vagrant"`).
+  - `password` - Account password (defaults to `"vagrant"`).
+  - `displayName` - Account display name (defaults to `username`).
+  - `group` - Group membership (defaults to `"administrators"`).
+  - `description` - User account description (defaults to `"Local User"`).
+- `administratorPassword` - Explicit Administrator password, defaults to the primary user's password.
+- `enableLUA` - User Account Control (UAC/LUA) setting (`true` enables UAC, `false` disables UAC, `null` omits component), defaults to `true`.
+- `oobe` - Out-Of-Box Experience & AutoLogon configuration, defaults to `{ }`.
+  - `autoLogon` - AutoLogon options (`{ enable ? true, user ? null, password ? null, count ? null }`).
+  - `networkLocation` - Network location setting (defaults to `"Home"`).
+  - `protectYourPC` - Protect your PC setting (defaults to `"3"`).
+  - `hideEULA` - Hide EULA page during OOBE (defaults to `true`).
+  - `hideWirelessSetup` - Hide wireless setup in OOBE (defaults to `true`).
+- `virtio` - VirtIO driver configuration, defaults to `{ }`.
+  - `enable` - Auto-inject VirtIO storage, network, and guest agent driver paths (defaults to `true`).
+  - `drive` - Drive letter of the mounted VirtIO driver ISO (defaults to `"F"`).
+  - `version` - Target VirtIO driver OS version (`"w10"` or `"w11"`, defaults to `"w10"`).
+  - `drivers` - Custom list of VirtIO driver paths (defaults to standard QEMU driver set).
+- `diskConfig` - Disk partitioning options, defaults to `{ }`.
+  - `diskID` - ID of disk to partition (defaults to `"0"`).
+  - `willWipeDisk` - Whether to wipe existing disk contents (defaults to `true`).
+  - `efiSize` - EFI partition size in MB (defaults to `100`).
+  - `msrSize` - MSR partition size in MB (defaults to `16`).
+  - `label` - Windows primary partition label (defaults to `"Windows"`).
+  - `letter` - Windows primary partition drive letter (defaults to `"C"`).
+  - `createPartitions` - Custom list of create partition specifications (defaults to `null`).
+  - `modifyPartitions` - Custom list of modify partition specifications (defaults to `null`).
+- `tweaks` - Setup tweaks & workarounds, defaults to `{ }`.
+  - `bypassTPM` - Bypass Windows 11 TPM requirements during setup (defaults to `true`).
+  - `bypassSecureBoot` - Bypass Windows 11 Secure Boot requirements during setup (defaults to `true`).
+  - `disableHibernate` - Disable Windows hibernation and zero hibernation file size (defaults to `false`).
+- `commands` - Phase-based command lists, defaults to `{ }`.
+  - `windowsPE` - Commands executed during the `windowsPE` pass.
+  - `specialize` - Commands executed during the `specialize` pass.
+  - `oobeSystem` - Commands executed during the `oobeSystem` pass.
+  - `firstLogon` - Commands executed upon first user logon.
+  - *Command items can be strings (e.g. `"cmd.exe /c ..."`) or attribute sets:*
+    - `commandLine` / `path` - Command string to execute.
+    - `description` - Optional command description.
+    - `synchronous` - Whether the command runs synchronously (defaults to `true`).
+    - `requiresUserInput` - Whether the command requires user input (defaults to `false`, `firstLogon` commands only).
 
 ---
 

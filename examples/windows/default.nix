@@ -66,23 +66,30 @@ let
 
       # Generate Autounattend answer file at Nix eval time (no HCL template needed)
       autounattend = vmLib.mkAutounattend {
-        computerName = "DVM-Windows";
-        displayName = "Vagrant";
-        username = "vagrant";
-        password = "vagrant";
-        sku = "Windows 11 Pro";
-        windowsVersion = "w11";
-        firstLogonCommands = [
+        system.computerName = "DVM-Windows";
+        users = [
           {
-            description = "Set Execution Policy 64 Bit";
-            commandLine = "cmd.exe /c powershell -Command \"Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force\"";
-            requiresUserInput = true;
-          }
-          {
-            description = "Enable WinRM";
-            commandLine = "cmd.exe /c C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File E:\\enable-winrm.ps1";
+            username = "vagrant";
+            password = "vagrant";
+            displayName = "Vagrant";
           }
         ];
+        image.sku = "Windows 11 Pro";
+        virtio.version = "w11";
+        commands = {
+          firstLogon = [
+            {
+              description = "Set Execution Policy 64 Bit";
+              commandLine = "cmd.exe /c powershell -Command \"Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force\"";
+              synchronous = true;
+            }
+            {
+              description = "Enable WinRM";
+              commandLine = "cmd.exe /c C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -File E:\\enable-winrm.ps1";
+              synchronous = true;
+            }
+          ];
+        };
       };
     };
 
