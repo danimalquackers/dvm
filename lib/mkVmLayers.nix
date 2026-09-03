@@ -39,15 +39,31 @@ let
       # Use the user-provided function to link to the previous stage
       chained = prev: if prev == null then { } else chain ref fun prev;
 
+      # Helper for merging config layers
+      mergeConfig =
+        a: b:
+        if builtins.isAttrs a && builtins.isAttrs b then
+          lib.foldl' (
+            merged: key:
+            merged
+            // {
+              ${key} = if a ? ${key} && b ? ${key} then mergeConfig a.${key} b.${key} else b.${key} or a.${key};
+            }
+          ) { } (lib.unique (builtins.attrNames a ++ builtins.attrNames b))
+        else if builtins.isList a && builtins.isList b then
+          a ++ b
+        else
+          b;
+
       # Resolve and merge the configs from the base and current stage
-      config = lib.recursiveUpdate (base ref fun) (stage.config ref fun);
+      config = mergeConfig (base ref fun) (stage.config ref fun);
 
       # Build the current stage using the provided suffix
       image = mkVmImage {
         inherit useKVM plugins;
 
         name = "${name}-${stage.name}";
-        config = ref: fun: lib.recursiveUpdate config (chained prevImage);
+        config = ref: fun: mergeConfig config (chained prevImage);
       };
 
       # Create a builder for each layer that lazily builds prior stages
@@ -55,7 +71,7 @@ let
         inherit plugins;
 
         name = "${name}-${stage.name}";
-        config = ref: fun: lib.recursiveUpdate config (chained prevDrvPath);
+        config = ref: fun: mergeConfig config (chained prevDrvPath);
       };
     in
     {
