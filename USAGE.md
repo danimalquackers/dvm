@@ -333,7 +333,7 @@ autounattend = pkgs.mkAutounattend {
   - `username` (or `name`) - Account username (defaults to `"vagrant"`).
   - `password` - Account password (defaults to `"vagrant"`).
   - `displayName` - Account display name (defaults to `username`).
-  - `group` - Group membership (defaults to `"administrators"`).
+  - `group` - Group membership (defaults to `"Administrators"`).
   - `description` - User account description (defaults to `"Local User"`).
 - `administratorPassword` - Explicit Administrator password, defaults to the primary user's password.
 - `enableLUA` - User Account Control (UAC/LUA) setting (`true` enables UAC, `false` disables UAC, `null` omits component), defaults to `true`.
@@ -361,6 +361,7 @@ autounattend = pkgs.mkAutounattend {
   - `bypassTPM` - Bypass Windows 11 TPM requirements during setup (defaults to `true`).
   - `bypassSecureBoot` - Bypass Windows 11 Secure Boot requirements during setup (defaults to `true`).
   - `disableHibernate` - Disable Windows hibernation and zero hibernation file size (defaults to `false`).
+  - `enableAdministrator` - Enable built-in Administrator account (defaults to `true`).
 - `commands` - Phase-based command lists, defaults to `{ }`.
   - `windowsPE` - Commands executed during the `windowsPE` pass.
   - `specialize` - Commands executed during the `specialize` pass.

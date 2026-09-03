@@ -15,7 +15,7 @@
       username = "vagrant";
       password = "vagrant";
       displayName = "Vagrant";
-      group = "administrators";
+      group = "Administrators";
       description = "Local User";
     }
   ],
@@ -72,7 +72,7 @@ let
       username = uname;
       password = u.password or "";
       displayName = u.displayName or uname;
-      group = u.group or "administrators";
+      group = u.group or "Administrators";
       description = u.description or "Local User";
     }
   ) users;
