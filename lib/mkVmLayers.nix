@@ -33,8 +33,7 @@ let
       fun = pkgs.callPackage ./fun.nix { };
 
       # Derive the store path for the previous image
-      prevDrvPath =
-        if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.drvPath;
+      prevOutPath = if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.out;
 
       # Use the user-provided function to link to the previous stage
       chained = prev: if prev == null then { } else chain ref fun prev;
@@ -71,7 +70,7 @@ let
         inherit plugins;
 
         name = "${name}-${stage.name}";
-        config = ref: fun: mergeConfig config (chained prevDrvPath);
+        config = ref: fun: mergeConfig config (chained prevOutPath);
       };
     in
     {
