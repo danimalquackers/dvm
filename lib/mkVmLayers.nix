@@ -88,7 +88,7 @@ let
                 set -e
 
                 echo "Building previous stage's image..." >&2
-                nix-store --realise '${prevDrvPath}'
+                nix-store --realise '${prevOutPath}'
 
                 exec ${builder}/bin/build-${name}-${stage.name}-vm "$@"
               '';
