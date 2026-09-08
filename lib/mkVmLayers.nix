@@ -32,8 +32,11 @@ let
       ref = pkgs.callPackage ./ref.nix { };
       fun = pkgs.callPackage ./fun.nix { };
 
-      # Derive the store path for the previous image
-      prevOutPath = if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.outPath;
+      # Derive the store paths for the previous image
+      prevDrvPath =
+        if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.drvPath;
+      prevOutPath =
+        if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.outPath;
 
       # Use the user-provided function to link to the previous stage
       chained = prev: if prev == null then { } else chain ref fun prev;
@@ -88,7 +91,7 @@ let
                 set -e
 
                 echo "Building previous stage's image..." >&2
-                nix-store --realise '${prevOutPath}'
+                nix-store --realise '${prevDrvPath}'
 
                 exec ${builder}/bin/build-${name}-${stage.name}-vm "$@"
               '';
