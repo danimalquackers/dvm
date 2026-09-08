@@ -33,7 +33,7 @@ let
       fun = pkgs.callPackage ./fun.nix { };
 
       # Derive the store path for the previous image
-      prevOutPath = if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.out;
+      prevOutPath = if prevImage == null then null else builtins.unsafeDiscardStringContext prevImage.outPath;
 
       # Use the user-provided function to link to the previous stage
       chained = prev: if prev == null then { } else chain ref fun prev;
