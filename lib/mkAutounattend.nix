@@ -94,7 +94,7 @@ let
 
   # VirtIO drivers setup (using lowercase virtio casing)
   virtioEnable = virtio.enable or true;
-  virtioDrive = virtio.drive or "F";
+  virtioPath = virtio.path or "F:";
   virtioVersion = virtio.version or "w10";
   virtioDriversSpec = virtio.drivers or null;
 
@@ -103,43 +103,43 @@ let
   defaultVirtioDrivers = [
     {
       keyValue = "2";
-      path = "${virtioDrive}:\\viostor\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\viostor\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "3";
-      path = "${virtioDrive}:\\NetKVM\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\NetKVM\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "4";
-      path = "${virtioDrive}:\\Balloon\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\Balloon\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "5";
-      path = "${virtioDrive}:\\pvpanic\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\pvpanic\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "6";
-      path = "${virtioDrive}:\\qemupciserial\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\qemupciserial\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "7";
-      path = "${virtioDrive}:\\qxldod\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\qxldod\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "8";
-      path = "${virtioDrive}:\\vioinput\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\vioinput\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "9";
-      path = "${virtioDrive}:\\viorng\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\viorng\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "10";
-      path = "${virtioDrive}:\\vioscsi\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\vioscsi\\${virtioRawVersion}\\amd64";
     }
     {
       keyValue = "11";
-      path = "${virtioDrive}:\\vioserial\\${virtioRawVersion}\\amd64";
+      path = "${virtioPath}\\vioserial\\${virtioRawVersion}\\amd64";
     }
   ];
 
